@@ -3,7 +3,7 @@
 import 'dart:async';
 import '../services/network.dart';
 
-const apiToken = 'QTVXCOASBD3ZIC1J';
+const apiToken = 'W2D3PPCXZQKT5NEP';
 
 class StockService {
 
