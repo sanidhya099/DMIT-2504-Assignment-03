@@ -1,7 +1,6 @@
 // ignore_for_file: todo, avoid_print, use_key_in_widget_constructors, avoid_function_literals_in_foreach_calls, use_build_context_synchronously, unused_local_variable, prefer_const_constructors
 
 import 'package:flutter/material.dart';
-import 'dart:async';
 import '../services/stock-service.dart';
 import '../services/db-service.dart';
 
@@ -60,8 +59,39 @@ class HomeViewState extends State<HomeView> {
               },
             ),
             Expanded(
-              //TODO: Replace this Text child with a ListView.builder
-              child: Text('Hi'),
+              child: ListView.builder(
+                itemCount: stockList.length,
+                itemBuilder: (context, index) {
+                  final stock = stockList[index];
+                  return Container(
+                    padding: EdgeInsets.all(8.0),
+                    margin:
+                        EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(5.0),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Symbol: ${stock['symbol']}',
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16.0)),
+                            Text('Name: ${stock['name']}',
+                                style: TextStyle(fontSize: 16.0)),
+                          ],
+                        ),
+                        Text('Price: ${stock['price']} USD',
+                            style: TextStyle(fontSize: 16.0)),
+                      ],
+                    ),
+                  );
+                },
+              ),
             ),
           ],
         ),
@@ -88,30 +118,29 @@ class HomeViewState extends State<HomeView> {
                 onPressed: () async {
                   if (stockSymbol.isNotEmpty) {
                     print('User entered Symbol: $stockSymbol');
-                    var symbol = stockSymbol;
                     var companyName = '';
                     var price = '';
                     try {
-                      //TODO:
-                      //Inside of this try,
-                      //get the company data with
-                      //stockService.getCompanyInfo,
-                      //then get the stock data with
-                      //stockService.getQuote,
-                      //but remember you must use await,
-                      //then if it is not null,
-                      //dig out the symbol, companyName, and latestPrice,
-                      //then create a new object of
-                      //type Stock and add it to
-                      //the database by calling
-                      //databaseService.insertStock,
-                      //then get all the stocks from
-                      //the database with
-                      //databaseService.getAllStocksFromDb and
-                      //attach them to stockList,
-                      //then print all stocks to the console and,
-                      //finally call setstate at the end.
-                      
+                      var companyData =
+                          await stockService.getCompanyInfo(stockSymbol);
+                      var quoteData = await stockService.getQuote(stockSymbol);
+
+                      if (companyData != null && quoteData != null) {
+                        companyName = companyData['Name'] ?? 'Unknown Company';
+                        price = quoteData['Global Quote']['05. price'] ?? '0';
+
+                        Map<String, dynamic> stock = {
+                          'symbol': stockSymbol,
+                          'name': companyName,
+                          'price': price,
+                          'sector': companyData['Sector'] ?? 'Unknown Sector',
+                        };
+
+                        await databaseService.insertStock(stock);
+                        stockList = await databaseService.getAllStocksFromDb();
+                        await databaseService.printAllStocksInDbToConsole();
+                        setState(() {});
+                      }
                     } catch (e) {
                       print('HomeView inputStock catch: $e');
                     }
