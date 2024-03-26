@@ -21,6 +21,8 @@ class SQFliteDbService {
     }
   }
 
+
+
   Future<void> printAllStocksInDbToConsole() async {
     try {
       final List<Map<String, dynamic>> stocks = await db.query('Stocks');
@@ -40,12 +42,14 @@ class SQFliteDbService {
     }
   }
 
+
+
   Future<void> deleteDb() async {
     try {
       await sqflitePackage.deleteDatabase(path);
       print('Database Deleted Successfully');
     } catch (e) {
-      print('SQFliteDbService deleteDb: $e');
+      print('SQFliteDbService deleteDb error: $e');
     }
   }
 
